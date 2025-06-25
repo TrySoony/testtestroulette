@@ -1,0 +1,61 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*build/
+dist/
+*.egg-info/
+venv/
+env/
+
+# Sensitive files
+config.py
+business_connections.json
+*.log
+
+# OS-specific
+.DS_Store
+Thumbs.db
+
+# Конфиденциальные данные
+.env
+*.env
+
+# Логи
+logs/
+
+# Временные файлы
+*.tmp
+*.backup.*
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Операционная система
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Резервные копии данных
+user_data.json.backup.*
+*.backup
+
+# Кэш
+.cache/
+.pytest_cache/
+
+# Coverage
+htmlcov/
+.coverage
+.coverage.*
+coverage.xml
+*.cover
+.hypothesis/ 
