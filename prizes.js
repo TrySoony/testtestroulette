@@ -1,39 +1,43 @@
 // prizes.js
 const prizes = [
   { 
-    name: "Nail Bracelet", 
-    starPrice: 100000, 
-    img: "images/nail_bracelet.png" // Локальный путь
+    name: "Лампочка", 
+    starPrice: 1, 
+    img: "https://telegram.org/file/464001154/1/b7G2O2f2m4s.30792/b8a4ca3c224c7a6f3b" 
   },
   { 
-    name: "Bonded Ring", 
-    starPrice: 37500, 
-    img: "images/bonded_ring.png" // Локальный путь
+    name: "Хот-дог", 
+    starPrice: 5, 
+    img: "https://telegram.org/file/464001154/1/7l_QzBqpdks.33796/c234b6fdf815525048" 
   },
   { 
-    name: "Neko Helmet", 
-    starPrice: 14000, 
-    img: "images/neko_helmet.png" // Локальный путь
+    name: "НЛО", 
+    starPrice: 10, 
+    img: "https://telegram.org/file/464001154/1/b5WbZ2z3G8E.33810/a56396e8e50f55e347" 
   },
   { 
-    name: "Diamond Ring", 
-    starPrice: 6700, 
-    img: "images/diamond_ring.png" // Для пустого приза картинка не нужна
+    name: "Дракон", 
+    starPrice: 25, 
+    img: "https://telegram.org/file/464001154/1/b28dff4e2d3.33842/b4d75f284d72863f68" 
   },
   { 
-    name: "Love Potion", 
-    starPrice: 4200, 
-    img: "images/love_potion.png" // Локальный путь
+    name: "Кот-учёный", 
+    starPrice: 50, 
+    img: "https://telegram.org/file/464001154/1/d798b0f8cab.33857/d151d932145b46f56a" 
   },
   { 
-    name: "Easter Egg", 
-    starPrice: 1050, 
-    img: "images/easter_egg.png" // Локальный путь
+    name: "Money Gun", 
+    starPrice: 100, 
+    img: "https://telegram.org/file/464001154/1/b-Ww4M6a8M4.33890/c8541c8f15be7764d8" 
   },
   { 
-    name: "Light Sword", 
-    starPrice: 1450, 
-    img: "images/light_sword.png" // Локальный путь
+    name: "Lamborghini", 
+    starPrice: 500, 
+    img: "https://telegram.org/file/464001154/1/8PjO0kSVeDo.33924/3169f4851bb8d9f485" 
   },
-
+  { 
+    name: "Пусто", 
+    starPrice: 0, 
+    img: "" // Пустая строка для пустого приза
+  }
 ];

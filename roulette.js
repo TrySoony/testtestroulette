@@ -1,107 +1,28 @@
 const roulette = document.getElementById('roulette');
 const spinBtn = document.getElementById('spin');
 const resultDiv = document.getElementById('result');
-const giftsList = document.getElementById('gifts-list');
 
-let currentUser = {}; // Храним ID пользователя
-let attemptsLeft = 0; // Храним оставшиеся попытки
-let userGifts = [];
-let telegramUser = null;
+// Максимум попыток
+const MAX_ATTEMPTS = 2;
 
-function showError(message) {
-    alert(message);
+function getAttempts() {
+  return parseInt(localStorage.getItem('roulette_attempts') || '0', 10);
 }
-
-function initializeApp() {
-    try {
-        const tg = window.Telegram.WebApp;
-        tg.ready();
-
-        if (tg.initDataUnsafe && tg.initDataUnsafe.user && tg.initDataUnsafe.user.id) {
-            telegramUser = tg.initDataUnsafe.user;
-            
-            tg.expand();
-            if (tg.BackButton.isVisible) {
-                tg.BackButton.hide();
-            }
-
-            announceUser(telegramUser.id).then(() => {
-                fetchUserStatus(telegramUser.id);
-            });
-
-        } else {
-            let errorDetails = [`tg.initData: ${tg.initData}`, `tg.initDataUnsafe: ${JSON.stringify(tg.initDataUnsafe, null, 2)}`];
-            const friendlyMessage = "Это приложение должно запускаться из Telegram.\nПожалуйста, не открывайте ссылку напрямую в браузере. Вернитесь в бот и нажмите кнопку 'Открыть рулетку'.";
-            showError("Ошибка: не удалось получить данные пользователя.\n\n" + friendlyMessage + "\n\n--- Техническая информация ---\n" + errorDetails.join('\n'));
-            spinBtn.disabled = true;
-        }
-    } catch (e) {
-        showError(`V1.2 Critical initialization error: ${e.message}. The app must be run from Telegram.`);
-        spinBtn.disabled = true;
-    }
+function setAttempts(val) {
+  localStorage.setItem('roulette_attempts', val);
 }
-
-// Новая функция для создания/анонсирования пользователя на сервере
-async function announceUser(userId) {
-  // Валидация userId на клиенте
-  if (!userId || typeof userId !== 'number' || userId <= 0) {
-    console.error('Invalid user ID:', userId);
-    throw new Error('Invalid user ID');
-  }
-
-  try {
-    const response = await fetch('/api/user', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ user_id: userId })
-    });
-    
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || 'Server error');
-    }
-    
-    const data = await response.json();
-    console.log('User announced successfully:', data.message);
-    currentUser.id = userId; // Устанавливаем ID текущего пользователя
-  } catch (error) {
-    console.error("Error announcing user:", error);
-    throw error;
-  }
+function incAttempts() {
+  setAttempts(getAttempts() + 1);
 }
-
-// Получаем статус пользователя с сервера
-async function fetchUserStatus(userId) {
-  // Валидация userId на клиенте
-  if (!userId || typeof userId !== 'number' || userId <= 0) {
-    console.error('Invalid user ID:', userId);
-    throw new Error('Invalid user ID');
-  }
-
-  try {
-    const response = await fetch(`/api/get_user_status?user_id=${userId}`);
-    
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || 'Server error');
-    }
-    
-    const data = await response.json();
-    attemptsLeft = data.attempts_left;
-    updateSpinBtnState();
-    updateGiftsList(data.gifts); // Сразу обновляем список подарков
-  } catch (error) {
-    console.error("Failed to fetch user status:", error);
-    throw error;
-  }
+function isSpinAvailable() {
+  return getAttempts() < MAX_ATTEMPTS;
 }
-
 function updateSpinBtnState() {
-  spinBtn.disabled = attemptsLeft <= 0;
-  if (attemptsLeft <= 0) {
+  spinBtn.disabled = !isSpinAvailable();
+  if (!isSpinAvailable()) {
     spinBtn.textContent = 'Попытки закончились';
   } else {
-    spinBtn.textContent = `Крутить! (${attemptsLeft} left)`;
+    spinBtn.textContent = 'Крутить!';
   }
 }
 
@@ -135,137 +56,105 @@ function getPrizeWidth() {
   return prizeWidth;
 }
 
-// Функция для запуска конфетти-салюта
-function launchConfetti() {
-  const duration = 3 * 1000;
-  const animationEnd = Date.now() + duration;
-  const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 101 };
+function spinRoulette() {
+  if (!isSpinAvailable()) return;
+  incAttempts();
+  updateSpinBtnState();
+  resultDiv.textContent = '';
 
-  function randomInRange(min, max) {
-    return Math.random() * (max - min) + min;
+  const prizeCount = prizes.length;
+  const prizeWidth = getPrizeWidth();
+  const visibleCount = Math.floor(roulette.parentElement.offsetWidth / prizeWidth);
+  const centerIndex = Math.floor(visibleCount / 2);
+
+  const randomIndex = Math.floor(Math.random() * prizeCount);
+  const rounds = Math.floor(Math.random() * 3) + 5;
+  const totalSteps = rounds * prizeCount + randomIndex;
+  const extendedLength = totalSteps + visibleCount + 2;
+  let extendedPrizes = [];
+  while (extendedPrizes.length < extendedLength) {
+    extendedPrizes = extendedPrizes.concat(prizes);
   }
+  extendedPrizes = extendedPrizes.slice(0, extendedLength);
 
-  const interval = setInterval(function() {
-    const timeLeft = animationEnd - Date.now();
-    if (timeLeft <= 0) {
-      return clearInterval(interval);
-    }
-    const particleCount = 50 * (timeLeft / duration);
-    // Запускаем конфетти с двух сторон для эффекта салюта
-    confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } });
-    confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } });
-  }, 250);
-}
+  renderPrizes(extendedPrizes);
 
-// Управление модальным окном
-const winModalOverlay = document.getElementById('win-modal-overlay');
-const winModalImg = document.getElementById('win-modal-img');
-const winModalTitle = document.getElementById('win-modal-title');
-const winModalPrice = document.getElementById('win-modal-price');
-const winModalBtn = document.getElementById('win-modal-btn');
+  const offset = (totalSteps - centerIndex) * prizeWidth;
 
-function showWinModal(prize) {
-  winModalImg.src = prize.img;
-  winModalTitle.textContent = prize.name;
-  winModalPrice.textContent = `${prize.starPrice}⭐`;
-  winModalOverlay.classList.add('visible');
-  launchConfetti(); // Запускаем конфетти вместе с окном
-}
+  // Сброс transform и transition (моментально)
+  roulette.style.transition = 'none';
+  roulette.style.transform = 'translateX(0px)';
 
-function hideWinModal() {
-  winModalOverlay.classList.remove('visible');
-}
+  // Даем браузеру применить сброс (через requestAnimationFrame)
+  requestAnimationFrame(() => {
+    // Теперь задаём анимацию вправо
+    roulette.style.transition = 'transform 2s cubic-bezier(0.15, 0.85, 0.35, 1)';
+    roulette.style.transform = `translateX(-${offset}px)`;
+  });
 
-// Закрытие модального окна
-winModalOverlay.addEventListener('click', (e) => {
-  if (e.target === winModalOverlay) {
-    hideWinModal();
-  }
-});
-winModalBtn.addEventListener('click', () => {
-  hideWinModal();
-  // Переключаемся на вкладку "Мои подарки"
-  document.querySelector('.tab-btn[data-tab="gifts"]').click();
-});
-
-async function spinRoulette() {
-  if (attemptsLeft <= 0) {
-    showError("У вас не осталось попыток.");
-    return;
-  }
-  spinBtn.disabled = true;
-
-  try {
-    // 1. Сначала получаем результат с сервера
-    const response = await fetch('/api/spin', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ user_id: currentUser.id })
+  setTimeout(() => {
+    // Получаем координаты pointer
+    const pointer = document.querySelector('.pointer');
+    const pointerRect = pointer.getBoundingClientRect();
+    // Получаем все призы
+    const prizeDivs = document.querySelectorAll('.prize');
+    let foundPrize = null;
+    prizeDivs.forEach(div => {
+      const rect = div.getBoundingClientRect();
+      // Проверяем, находится ли центр pointer внутри div
+      if (
+        pointerRect.left >= rect.left &&
+        pointerRect.left <= rect.right
+      ) {
+        // prize.name теперь в .prize-name
+        foundPrize = div.querySelector('.prize-name').textContent;
+      }
     });
 
-    const data = await response.json();
-    if (!response.ok) {
-      throw new Error(data.error || 'Не удалось выполнить прокрутку');
+    // Находим приз по названию
+    let prizeUnderPointer = null;
+    if (foundPrize) {
+      prizeUnderPointer = prizes.find(prize => foundPrize === prize.name);
     }
 
-    const wonPrize = data.won_prize;
-    const prizeIndex = prizes.findIndex(p => p.name === wonPrize.name);
-    
-    if (prizeIndex === -1) {
-        throw new Error("Сервер вернул неизвестный приз.");
+    // Фолбэк, если не найдено (на всякий случай)
+    if (!prizeUnderPointer) {
+      prizeUnderPointer = prizes[randomIndex % prizeCount];
     }
 
-    // 2. Теперь запускаем анимацию, зная точный результат
-    const prizeCount = prizes.length;
-    const prizeWidth = getPrizeWidth();
-    const visibleCount = Math.floor(roulette.parentElement.offsetWidth / prizeWidth);
-    const centerIndex = Math.floor(visibleCount / 2);
-
-    const rounds = 5; // Фиксированное количество оборотов для предсказуемости
-    const totalSteps = rounds * prizeCount + prizeIndex;
-    const extendedLength = totalSteps + visibleCount + 2;
-    let extendedPrizes = [];
-    while (extendedPrizes.length < extendedLength) {
-        extendedPrizes = extendedPrizes.concat(prizes);
+    if (prizeUnderPointer.starPrice > 0) {
+      resultDiv.textContent = `Вы выиграли: ${prizeUnderPointer.name} (${prizeUnderPointer.starPrice}⭐)!`;
+      saveGift(prizeUnderPointer);
+    } else {
+      resultDiv.textContent = `Вы ничего не выиграли.`;
     }
-    extendedPrizes = extendedPrizes.slice(0, extendedLength);
 
-    renderPrizes(extendedPrizes);
-    
-    // Сбрасываем старые анимации
-    roulette.style.transition = 'none';
-    roulette.style.transform = 'translateX(0)';
-    roulette.classList.remove('spinning');
+    // Отправка результата в Telegram WebApp
+    if (window.Telegram && Telegram.WebApp) {
+      Telegram.WebApp.sendData(JSON.stringify({prize: prizeUnderPointer}));
+      Telegram.WebApp.close();
+    }
 
-    // Даем браузеру обновиться
-    await new Promise(resolve => requestAnimationFrame(resolve));
+    spinBtn.disabled = !isSpinAvailable();
+    if (!isSpinAvailable()) {
+      spinBtn.textContent = 'Попытки закончились';
+    } else {
+      spinBtn.textContent = 'Крутить!';
+    }
+  }, 2000);
+}
 
-    const offset = (totalSteps - centerIndex) * prizeWidth;
-    
-    // Устанавливаем анимацию
-    roulette.style.transition = 'transform 5s cubic-bezier(0.2, 0.8, 0.2, 1)';
-    roulette.style.transform = `translateX(-${offset}px)`;
-
-    // 3. Обновляем состояние и показываем результат после завершения анимации
-    roulette.addEventListener('transitionend', () => {
-        attemptsLeft = data.attempts_left;
-        updateSpinBtnState();
-
-        if (wonPrize.starPrice > 0) {
-            showWinModal(wonPrize);
-            fetchUserStatus(currentUser.id); // Обновляем список подарков
-        } else {
-            resultDiv.textContent = `Вы ничего не выиграли.`;
-        }
-        spinBtn.disabled = false; // Разблокируем кнопку после завершения
-    }, { once: true });
-
-
-  } catch (error) {
-    console.error('Error during spin:', error);
-    showError(`Ошибка: ${error.message}`);
-    spinBtn.disabled = false; // Разблокируем кнопку в случае ошибки
-  }
+// Сохраняем выигранный приз
+function saveGift(prize) {
+  if (prize.starPrice === 0) return; // не сохраняем пусто
+  const gifts = JSON.parse(localStorage.getItem('my_gifts') || '[]');
+  gifts.push({
+    name: prize.name,
+    img: prize.img,
+    starPrice: prize.starPrice,
+    date: new Date().toLocaleDateString('ru-RU')
+  });
+  localStorage.setItem('my_gifts', JSON.stringify(gifts));
 }
 
 // Первичная отрисовка (по умолчанию 3 круга)
@@ -287,4 +176,4 @@ async function spinRoulette() {
 // При загрузке страницы обновляем состояние кнопки
 updateSpinBtnState();
 
-initializeApp();
+spinBtn.addEventListener('click', spinRoulette);

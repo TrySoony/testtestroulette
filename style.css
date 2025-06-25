@@ -33,33 +33,9 @@ h1 {
 
 .roulette {
   display: flex;
+  transition: transform 4s cubic-bezier(0.25, 0.1, 0.25, 1);
   height: 120px;
   gap: 8px;
-}
-
-/* Новый класс для запуска анимации */
-.roulette.spinning {
-  /* Новая кривая: очень быстрый старт, плавное замедление */
-  animation: spinAnimation 5s cubic-bezier(0.1, 0.8, 0.2, 1) forwards;
-}
-
-@keyframes spinAnimation {
-  0% {
-    transform: translateX(0);
-    filter: blur(0px);
-  }
-  15% {
-    /* Добавляем размытие в начале быстрой фазы */
-    filter: blur(1.5px);
-  }
-  85% {
-    /* Убираем размытие к концу, когда рулетка замедляется */
-    filter: blur(0.5px);
-  }
-  100% {
-    transform: translateX(var(--spin-offset, 0px));
-    filter: blur(0px);
-  }
 }
 
 .prize {
@@ -136,24 +112,19 @@ button, .tab-btn {
 }
 
 /* --- Стили для нижних вкладок --- */
-.tabs-container {
+.bottom-tabs {
   position: fixed;
-  bottom: 0;
   left: 0;
   right: 0;
-  z-index: 100;
-  padding-bottom: env(safe-area-inset-bottom);
+  bottom: 0;
   background: #fff;
-  box-shadow: 0 -2px 16px #e91e6322;
-  border-top: 2px solid #f8bbd0;
-}
-
-.bottom-tabs {
   display: flex;
   justify-content: space-around;
+  border-top: 2px solid #f8bbd0;
+  z-index: 100;
   height: 60px;
+  box-shadow: 0 -2px 16px #e91e6322;
 }
-
 .tab-btn {
   flex: 1;
   background: none;
@@ -184,8 +155,7 @@ button, .tab-btn {
   margin-bottom: 2px;
 }
 .tab-content {
-  /* Увеличиваем отступ, чтобы учесть высоту табов и безопасную зону */
-  padding-bottom: calc(60px + env(safe-area-inset-bottom, 20px)); /* Оставляем запас */
+  padding-bottom: 80px; /* чтобы контент не перекрывался табами */
   max-width: 500px;
   margin: 0 auto;
 }
@@ -244,490 +214,31 @@ ul#my-gifts-list {
   margin: 0;
 }
 
-/* Анимация для выигранного приза */
-.prize.prize-won {
-  animation: prize-pop 0.5s ease-out forwards;
-  transform-origin: center center;
-  z-index: 10;
-  position: relative;
-}
-
-@keyframes prize-pop {
-  0% {
-    transform: scale(1);
-    box-shadow: 0 0 10px #f8bbd0;
-  }
-  50% {
-    transform: scale(1.15);
-    box-shadow: 0 0 25px #e91e63;
-  }
-  100% {
-    transform: scale(1.1);
-    box-shadow: 0 0 15px #e91e63;
-  }
-}
-
-/* Анимация для текста результата */
-#result {
-  min-height: 1.5em; /* Резервируем место, чтобы не было прыжка */
-}
-#result.won {
-  animation: text-fade-in 0.5s ease-out;
-}
-
-@keyframes text-fade-in {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-/* Стили для списка призов под рулеткой */
-.prize-list-container {
-  margin: 40px auto 0;
-  padding: 0 15px;
-  max-width: 500px;
-}
-.prize-list-container h2 {
-  font-size: 1.5rem;
-  color: #e91e63;
-  margin-bottom: 20px;
-}
-#prize-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: grid;
-  grid-template-columns: 1fr; /* Одна колонка по умолчанию */
-  gap: 15px;
-}
-#prize-list li {
-  display: flex;
-  align-items: center;
-  background: #fff;
-  padding: 10px 15px;
-  border-radius: 12px;
-  box-shadow: 0 2px 10px #e91e631a;
-  border: 1px solid #f8bbd0;
-}
-#prize-list img {
-  width: 40px;
-  height: 40px;
-  object-fit: contain;
-  margin-right: 15px;
-}
-.prize-list-name {
-  font-weight: 500;
-  color: #333;
-  margin-right: auto; /* Прижимает цену к правому краю */
-}
-.prize-list-price {
-  font-weight: bold;
-  color: #e91e63;
-}
-
-@media (min-width: 550px) {
-  #prize-list {
-    grid-template-columns: repeat(2, 1fr); /* Две колонки на больших экранах */
-  }
-}
-
 @media (max-width: 500px) {
-  h1 {
-    font-size: 1.8rem;
-  }
   .roulette-container {
     width: 98vw;
-    height: 110px;
+    height: 90px;
   }
   .prize {
-    width: 100px;
-    height: 90px;
-    font-size: 13px;
-  }
-  .prize-img {
-    width: 45px;
-    height: 45px;
+    width: 80px;
+    height: 70px;
+    font-size: 15px;
   }
   .bottom-tabs {
-    height: 55px;
+    height: 50px;
   }
   .tab-btn {
-    font-size: 14px;
-    gap: 1px;
-  }
-  .tab-btn .tab-icon {
-    font-size: 20px;
+    font-size: 15px;
   }
   .tab-content {
-    /* Также увеличиваем отступ для мобильной версии */
-    padding-bottom: calc(55px + env(safe-area-inset-bottom, 20px)); /* Оставляем запас */
-  }
-  .gift-card {
-    padding: 16px 12px 12px 12px;
-    max-width: 95vw;
+    padding-bottom: 60px;
   }
   .gift-card img {
-    width: 100px;
-    height: 100px;
+    width: 80px;
+    height: 80px;
   }
-}
-
-/* Стили для модального окна */
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.6);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.3s ease;
-}
-.modal-overlay.visible {
-  opacity: 1;
-  pointer-events: auto;
-}
-.modal-content {
-  background: #fff;
-  padding: 30px;
-  border-radius: 20px;
-  text-align: center;
-  width: 90%;
-  max-width: 350px;
-  transform: scale(0.9);
-  transition: transform 0.3s ease;
-}
-.modal-overlay.visible .modal-content {
-  transform: scale(1);
-}
-#win-modal-img {
-  width: 120px;
-  height: 120px;
-  object-fit: contain;
-  margin-bottom: 15px;
-}
-#win-modal-title {
-  font-size: 1.8rem;
-  color: #333;
-  margin: 0 0 10px;
-}
-#win-modal-price {
-  font-size: 1.2rem;
-  color: #e91e63;
-  font-weight: bold;
-  margin: 0 0 25px;
-}
-#win-modal-btn {
-  background: #e91e63;
-  color: #fff;
-  padding: 12px 25px;
-  border: none;
-  border-radius: 12px;
-  font-size: 1rem;
-  font-weight: 500;
-  cursor: pointer;
-  width: 100%;
-}
-
-/* Стили для нового модального окна вывода */
-.modal-header {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  margin-bottom: 20px;
-}
-.modal-header h1 {
-  font-size: 1.6rem;
-  margin: 0;
-  color: #e91e63;
-}
-.modal-icon {
-  font-size: 1.8rem;
-}
-#withdraw-info-modal-overlay .modal-content h2 {
-    font-size: 1.4rem;
-    color: #333;
-    margin: 15px 0;
-}
-.info-box {
-  background-color: #fff0f6;
-  border-radius: 12px;
-  padding: 15px;
-  text-align: left;
-  margin: 20px 0;
-  border: 1px solid #ffe6f3;
-}
-.info-box p {
-  margin: 0;
-  line-height: 1.5;
-  font-size: 0.95rem;
-  color: #333;
-}
-.info-box p:first-child {
-  margin-bottom: 8px;
-}
-.info-box strong {
-    color: #e91e63;
-}
-.info-footer {
-    font-size: 0.9rem;
-    color: #888;
-    margin-bottom: 20px;
-}
-#withdraw-info-btn {
-  background: #ff80ab;
-  color: #fff;
-  padding: 12px 25px;
-  border: none;
-  border-radius: 12px;
-  font-size: 1rem;
-  font-weight: 500;
-  cursor: pointer;
-  width: 100%;
-}
-
-/* Стили для админ-панели */
-.admin-body {
-    background-color: #f0f2f5;
-    font-family: 'Inter', sans-serif;
-    color: #333;
-}
-
-.admin-container {
-    max-width: 900px;
-    margin: 20px auto;
-    padding: 20px;
-    background: #fff;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-}
-
-.admin-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 1px solid #e5e7eb;
-    padding-bottom: 16px;
-    margin-bottom: 20px;
-}
-
-.admin-header h1 {
-    font-size: 24px;
-    font-weight: 700;
-    color: #111827;
-}
-
-.tabs {
-    display: flex;
-    gap: 8px;
-}
-
-.tab-button {
-    padding: 8px 16px;
-    border: none;
-    background-color: transparent;
-    font-size: 14px;
-    font-weight: 500;
-    color: #6b7280;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.tab-button.active {
-    color: #fff;
-    background-color: #4f46e5;
-}
-
-.tab-button:hover:not(.active) {
-    background-color: #e5e7eb;
-}
-
-.tab-content {
-    display: none;
-}
-
-.tab-content.active {
-    display: block;
-}
-
-.user-list {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 16px;
-}
-
-.user-card {
-    background: #f9fafb;
-    border: 1px solid #e5e7eb;
-    border-radius: 10px;
-    padding: 16px;
-}
-
-.user-card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 12px;
-}
-
-.user-card-header h3 {
-    margin: 0;
-    font-size: 16px;
-    font-weight: 600;
-}
-
-.user-actions {
-    display: flex;
-    gap: 8px;
-}
-
-.button {
-    padding: 6px 12px;
-    border-radius: 6px;
-    font-size: 13px;
-    font-weight: 500;
-    cursor: pointer;
-    border: 1px solid transparent;
-    transition: all 0.2s ease;
-}
-
-.button.primary { background-color: #4f46e5; color: #fff; }
-.button.primary:hover { background-color: #4338ca; }
-.button.secondary { background-color: #e5e7eb; color: #374151; }
-.button.secondary:hover { background-color: #d1d5db; }
-.button.danger { background-color: #fee2e2; color: #b91c1c; }
-.button.danger:hover { background-color: #fecaca; }
-
-.button.small {
-    padding: 4px 8px;
-    font-size: 12px;
-}
-
-.gift-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-
-.gift-item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 8px;
-    border-radius: 6px;
-}
-
-.gift-item:nth-child(odd) {
-    background-color: #fff;
-}
-
-.gift-image {
-    width: 32px;
-    height: 32px;
-    object-fit: contain;
-    border-radius: 4px;
-}
-
-.empty-state {
-    text-align: center;
-    padding: 40px;
-    color: #6b7280;
-}
-
-/* Модальное окно */
-.modal {
-    display: none; 
-    position: fixed; 
-    z-index: 1000; 
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    overflow: auto;
-    background-color: rgba(0,0,0,0.5);
-    align-items: center;
-    justify-content: center;
-}
-
-.modal-content {
-    background-color: #fff;
-    padding: 24px;
-    border-radius: 12px;
-    width: 90%;
-    max-width: 400px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-    position: relative;
-    animation: fadeIn 0.3s;
-}
-
-.close-button {
-    color: #aaa;
-    position: absolute;
-    top: 10px;
-    right: 15px;
-    font-size: 24px;
-    font-weight: bold;
-    cursor: pointer;
-}
-
-.close-button:hover,
-.close-button:focus {
-    color: #000;
-}
-
-.form-group {
-    margin-bottom: 16px;
-}
-
-.form-group label {
-    display: block;
-    margin-bottom: 6px;
-    font-size: 14px;
-    font-weight: 500;
-}
-
-.form-group input {
-    width: 100%;
-    padding: 8px 12px;
-    border: 1px solid #d1d5db;
-    border-radius: 6px;
-    font-size: 14px;
-}
-
-/* Spinner */
-.spinner-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 40px;
-}
-
-.spinner {
-    border: 4px solid #f3f3f3;
-    border-top: 4px solid #4f46e5;
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-@keyframes fadeIn {
-  from {opacity: 0; transform: scale(0.95);}
-  to {opacity: 1; transform: scale(1);}
+  .gift-card {
+    padding: 16px 6px 12px 6px;
+    max-width: 98vw;
+  }
 }
